@@ -39,8 +39,11 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Lee la URI de MongoDB y el Token desde las variables de entorno de Render
-mongoose.connect(process.env.MONGO_URI)
+// Detecta automáticamente las variables de entorno con nombres comunes
+const mongoUri = process.env.MONGO_URI || process.env.MONGO_URL;
+const discordToken = process.env.DISCORD_TOKEN || process.env.TOKEN;
+
+mongoose.connect(mongoUri)
   .then(() => {
     console.log('🍃 Conectado exitosamente a MongoDB Atlas');
     
@@ -48,15 +51,11 @@ mongoose.connect(process.env.MONGO_URI)
       console.log(`🌐 Dashboard ejecutándose en http://localhost:${PORT}`);
     });
 
-    client.login(process.env.DISCORD_TOKEN);
+    client.login(discordToken);
   })
   .catch(err => {
     console.error('❌ Error al iniciar el bot o conectar a MongoDB:', err);
   });
-
-client.once('ready', () => {
-  console.log(`🤖 Bot conectado como ${client.user.tag}`);
-});
 
 client.once('ready', () => {
   console.log(`🤖 Bot conectado como ${client.user.tag}`);
