@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
-const { mongoUri } = require('./config.json');
+const config = require('../config.json');
 
 // Importar el modelo desde tu carpeta models (ajusta el nombre del archivo si es diferente, ej. reminder.js)
 const Reminder = require('./models/reminder'); 
