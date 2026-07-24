@@ -8,8 +8,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, '../views'));
+app.use(express.static(path.join(__dirname, '../public')));
 
 mongoose.connect(config.mongoUri)
   .then(() => console.log('🍃 Dashboard conectado a MongoDB Atlas'))
@@ -33,6 +33,10 @@ app.get('/', async (req, res) => {
       serversCount: 1
     });
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`🌐 Dashboard ejecutándose en http://localhost:${PORT}`);
 });
 
 app.listen(PORT, () => {
