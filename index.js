@@ -2,10 +2,8 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const mongoose = require('mongoose');
 const express = require('express');
 const path = require('path');
-const config = require('./config.json'); // Ajusta la ruta si config.json está en otro lado
 const Reminder = require('./models/Reminder');
 
-// 1. Configurar Discord Bot
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -14,7 +12,6 @@ const client = new Client({
   ]
 });
 
-// 2. Configurar Express (Dashboard)
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -42,22 +39,24 @@ app.get('/', async (req, res) => {
   }
 });
 
-// 3. Conexión a MongoDB e inicio general
-mongoose.connect(config.mongoUri)
+// Lee la URI de MongoDB y el Token desde las variables de entorno de Render
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('🍃 Conectado exitosamente a MongoDB Atlas');
     
-    // Iniciar servidor Express
     app.listen(PORT, () => {
       console.log(`🌐 Dashboard ejecutándose en http://localhost:${PORT}`);
     });
 
-    // Iniciar Bot de Discord
-    client.login(config.token);
+    client.login(process.env.DISCORD_TOKEN);
   })
   .catch(err => {
     console.error('❌ Error al iniciar el bot o conectar a MongoDB:', err);
   });
+
+client.once('ready', () => {
+  console.log(`🤖 Bot conectado como ${client.user.tag}`);
+});
 
 client.once('ready', () => {
   console.log(`🤖 Bot conectado como ${client.user.tag}`);
