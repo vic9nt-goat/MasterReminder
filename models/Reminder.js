@@ -4,8 +4,6 @@ const mongoose = require('mongoose');
 const config = require('../config.json');
 
 // Importar el modelo desde tu carpeta models (ajusta el nombre del archivo si es diferente, ej. reminder.js)
-const Reminder = require('./models/reminder'); 
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
