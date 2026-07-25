@@ -5,7 +5,8 @@ const db = require('../../database');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('recordar')
-    .setDescription('Centro avanzado de programación de recordatorios persistentes con múltiples opciones de personalización')
+// En /commands/recordatorios/recordar.js
+.setDescription('Crea y programa recordatorios persistentes personalizados')
     .addStringOption(option =>
       option.setName('mensaje')
         .setDescription('¿Qué contenido deseas que te recordemos de forma exacta?')
