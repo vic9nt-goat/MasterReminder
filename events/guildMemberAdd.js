@@ -13,6 +13,7 @@ module.exports = {
       const config = await db.getWelcomeConfig(guildId);
 
       if (!config) return;
+      
       const isEnabled = config.enabled === true || config.enabled === 'true' || config.enabled === 1;
       if (!isEnabled || !config.channelId) return;
 
@@ -43,7 +44,7 @@ module.exports = {
       if (config.roleId) {
         const role = member.guild.roles.cache.get(config.roleId);
         if (role) {
-          await member.roles.add(role).catch(err => console.error('No se pudo asignar el rol automático:', err));
+          await member.roles.add(role).catch(err => console.error('Error asignando rol automático:', err));
         }
       }
 
@@ -53,7 +54,7 @@ module.exports = {
       });
 
     } catch (error) {
-      console.error('Error crítico en el evento de bienvenida:', error);
+      console.error('Error crítico en el evento guildMemberAdd:', error);
     }
   }
 };
