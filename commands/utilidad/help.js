@@ -14,12 +14,13 @@ module.exports = {
         .setTitle('🌟 Panel Central de Asistencia • MasterReminder')
         .setDescription(
           '» **Menú de ayuda principal**\n' +
-          'Bienvenido al sistema automatizado de soporte y navegación. Actualmente tengo un total de \`3\` categorías operativas y \`6\` comandos avanzados desplegados para optimizar la gestión de tus alertas y servidores.\n\n' +
+          'Bienvenido al sistema automatizado de soporte y navegación. Actualmente tengo un total de `4` categorías operativas y comandos avanzados desplegados para optimizar la gestión de tus alertas y servidores.\n\n' +
           '» **Categorías Disponibles en el Servidor**\n' +
           '```text\n' +
-          'Configuración    Gestión administrativa y roles de mención automáticos\n' +
-          'Recordatorios    Creación, listado y borrado avanzado de alertas\n' +
-          'Utilidades       Paneles interactivos, ayuda y enlaces oficiales\n' +
+          'Configuración       Gestión administrativa y roles de mención automáticos\n' +
+          'Recordatorios       Creación, listado y borrado avanzado de alertas\n' +
+          'Bienvenidas         Módulo automatizado estilo Koya (config, test, reset)\n' +
+          'Utilidades          Paneles interactivos, ayuda y enlaces oficiales\n' +
           '```\n' +
           '» **Estadísticas del Sistema**\n' +
           '• **Estado de la Base de Datos:** `Conectado a MongoDB Atlas`\n' +
@@ -46,6 +47,12 @@ module.exports = {
             description: 'Crea, consulta tu bandeja y borra alertas pendientes',
             value: 'cat_reminders',
             emoji: '⏰'
+          },
+          {
+            label: 'Bienvenidas',
+            description: 'Sistema automatizado de bienvenidas estilo Koya (config, test, reset)',
+            value: 'cat_welcome',
+            emoji: '🎉'
           },
           {
             label: 'Utilidades',
@@ -117,6 +124,16 @@ module.exports = {
                 { name: '/borrar-recordatorio <id>', value: 'Elimina de forma segura un recordatorio específico utilizando su identificador único (_id).', inline: false }
               )
               .setFooter({ text: 'Sistema de persistencia activado' });
+          } else if (selectedVal === 'cat_welcome') {
+            subEmbed
+              .setTitle('🎉 Categoría: Sistema de Bienvenidas (Koya Style)')
+              .setDescription('Módulo avanzado para gestionar la recepción de nuevos miembros en tu servidor con tarjetas y automatización:')
+              .addFields(
+                { name: '/bienvenida-config [estado] [canal] [rol] [mensaje] [imagen]', value: 'Centro maestro de configuración para activar, definir canal, rol automático, texto personalizado y fondo.', inline: false },
+                { name: '/bienvenida-test', value: 'Simula una entrada de miembro para comprobar el diseño visual y el funcionamiento actual.', inline: false },
+                { name: '/bienvenida-reset', value: 'Borra y restaura por completo todos los ajustes de bienvenida del servidor.', inline: false }
+              )
+              .setFooter({ text: 'Módulo Automatizado de Bienvenidas' });
           } else if (selectedVal === 'cat_utils') {
             subEmbed
               .setTitle('🛠️ Categoría: Utilidades y Soporte')
