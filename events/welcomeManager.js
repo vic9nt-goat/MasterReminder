@@ -47,7 +47,7 @@ module.exports = {
         embeds: [embed]
       });
 
-    } data (error) {
+    } cath (error) {
       console.error('Error crítico en el evento de bienvenida:', error);
     }
   }
