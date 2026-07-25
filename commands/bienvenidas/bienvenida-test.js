@@ -1,6 +1,3 @@
-// ==========================================
-// ARCHIVO: commands/bienvenida/bienvenida-test.js
-// ==========================================
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const db = require('../../database');
 
@@ -17,7 +14,8 @@ module.exports = {
 
       const config = await db.getWelcomeConfig(guildId) || {};
       const channelId = config.channelId || interaction.channel.id;
-      const targetChannel = interaction.guild.channels.cache.get(channelId) || interaction.channel;
+      
+      const targetChannel = await interaction.guild.channels.fetch(channelId).catch(() => null) || interaction.channel;
 
       const customMsg = config.message || '¡Bienvenido {usuario} a {servidor}! Eres nuestro miembro número #{contador}.';
       const formattedMsg = customMsg
