@@ -16,19 +16,11 @@ module.exports = {
       const guildId = interaction.guild.id;
       const member = interaction.member;
 
-      const config = await db.getWelcomeConfig(guildId);
+      let config = await db.getWelcomeConfig(guildId);
 
       if (!config) {
-        return await interaction.editReply({ 
-          content: '⚠️ No hay ninguna configuración guardada en la base de datos.' 
-        });
-      }
-
-      const isEnabled = config.enabled === true || config.enabled === 'true' || config.enabled === 1;
-      if (!isEnabled) {
-        return await interaction.editReply({ 
-          content: '⚠️ El sistema de bienvenidas está **desactivado**. Actívalo con `/bienvenida-config estado:True`.' 
-        });
+        await db.updateWelcomeConfig(guildId, { enabled: true, channelId: interaction.channel.id });
+        config = await db.getWelcomeConfig(guildId);
       }
 
       const targetChannel = interaction.guild.channels.cache.get(config.channelId) || interaction.channel;
@@ -60,7 +52,7 @@ module.exports = {
       });
 
       await interaction.editReply({ 
-        content: `✅ ¡Simulación de bienvenida enviada con éxito a ${targetChannel} usando los datos de la base de datos!` 
+        content: `✅ ¡Simulación de bienvenida enviada con éxito a ${targetChannel}!` 
       });
 
     } catch (error) {
