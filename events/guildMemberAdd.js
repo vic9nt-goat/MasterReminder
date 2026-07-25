@@ -6,10 +6,15 @@ module.exports = {
   
   async execute(member) {
     try {
+      console.log(`[Welcome Debug] Evento detectado para el usuario: ${member.user.tag} en el servidor: ${member.guild.name}`);
+      
       const guildId = member.guild.id;
       
       const config = await db.getWelcomeConfig(guildId);
-      if (!config || !config.enabled) return;
+      if (!config || !config.enabled) {
+        console.log(`[Welcome Debug] Módulo desactivado o sin config para el servidor ${guildId}`);
+        return;
+      }
 
       if (config.roleId) {
         const targetRole = member.guild.roles.cache.get(config.roleId);
@@ -20,10 +25,16 @@ module.exports = {
       }
 
       const channelId = config.channelId;
-      if (!channelId) return;
+      if (!channelId) {
+        console.log(`[Welcome Debug] No hay un canal configurado para el servidor ${guildId}`);
+        return;
+      }
       
       const targetChannel = await member.guild.channels.fetch(channelId).catch(() => null);
-      if (!targetChannel) return;
+      if (!targetChannel) {
+        console.log(`[Welcome Debug] No se pudo encontrar el canal con ID ${channelId}`);
+        return;
+      }
 
       const rawMessage = config.message || '¡Bienvenido {usuario} a {servidor}! Eres nuestro miembro número #{contador}.';
       const formattedMessage = rawMessage
@@ -53,6 +64,8 @@ module.exports = {
         content: `${member}`,
         embeds: [embed]
       });
+
+      console.log(`[Welcome Debug] Bienvenida enviada exitosamente para ${member.user.tag}`);
 
     } catch (error) {
       console.error('[Critical Error] Ocurrió un fallo en el evento guildMemberAdd:', error);
