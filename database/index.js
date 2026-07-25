@@ -1,3 +1,6 @@
+// ==========================================
+// ARCHIVO: database/index.js
+// ==========================================
 const mongoose = require('mongoose');
 const Reminder = require('../models/Reminder');
 const GuildConfig = require('../models/GuildConfig');
@@ -57,8 +60,8 @@ module.exports = {
     const config = await GuildConfig.findOne({ guildId });
     if (!config) return null;
     return {
-      enabled: config.enabled === true || config.enabled === 'true' || config.enabled === 1,
-      channelId: config.channelId,
+      enabled: config.enabled === true || config.enabled === 'true' || config.enabled === 1 || config.estado === true || config.estado === 'true',
+      channelId: config.channelId || config.welcomeChannelId,
       roleId: config.roleId,
       message: config.message,
       imageUrl: config.imageUrl
@@ -68,7 +71,7 @@ module.exports = {
   setWelcomeToggle: async (guildId, enabled) => {
     return await GuildConfig.findOneAndUpdate(
       { guildId },
-      { enabled },
+      { enabled: Boolean(enabled) },
       { upsert: true, new: true }
     );
   },
