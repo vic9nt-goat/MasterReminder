@@ -16,19 +16,16 @@ module.exports = {
       const guildId = interaction.guild.id;
       const member = interaction.member;
 
-      // Obtenemos la configuración real de la base de datos
       const config = await db.getWelcomeConfig(guildId);
 
-      if (!config || !config.enabled) {
+      if (!config || (config.enabled !== true && config.enabled !== 'true' && config.enabled !== 1)) {
         return await interaction.editReply({ 
           content: '⚠️ El sistema de bienvenidas está **desactivado** o no tiene una configuración guardada. Actívalo primero con `/bienvenida-config estado:True`.' 
         });
       }
 
-      // Definimos el canal de destino (si no hay configurado, lo manda al canal actual de la prueba)
       const targetChannel = interaction.guild.channels.cache.get(config.channelId) || interaction.channel;
 
-      // Mensaje personalizado o predeterminado
       const customMsg = config.message || '¡Bienvenido {usuario} a {servidor}! Eres nuestro miembro número #{contador}.';
       const formattedMsg = customMsg
         .replace(/{usuario}/g, `${member}`)
@@ -50,14 +47,6 @@ module.exports = {
         embed.setImage(config.imageUrl);
       }
 
-      // Intentamos simular el rol si está configurado (solo avisará si no puede por permisos)
-      let rolInfo = '`Ninguno configurado`';
-      if (config.roleId) {
-        const role = interaction.guild.roles.cache.get(config.roleId);
-        if (role) rolInfo = `${role}`;
-      }
-
-      // Enviamos el mensaje simulado al canal correspondiente
       await targetChannel.send({
         content: `${member}`,
         embeds: [embed]
