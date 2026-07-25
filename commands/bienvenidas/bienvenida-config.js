@@ -69,7 +69,7 @@ module.exports = {
           .setTimestamp()
           .setFooter({ text: 'Koya Engine • Sistema de Bienvenidas' });
 
-        if (config.imageUrl) embed.setThumbnail(config.imageUrl);
+        if (config.imageUrl) embed.setImage(config.imageUrl);
 
         return await interaction.editReply({ embeds: [embed] });
       }
@@ -114,6 +114,10 @@ module.exports = {
         .addFields(fields)
         .setTimestamp()
         .setFooter({ text: 'Koya Engine • Sincronización Exitosa' });
+
+      if (imagen) {
+        successEmbed.setImage(imagen);
+      }
 
       await interaction.editReply({ embeds: [successEmbed] });
 
