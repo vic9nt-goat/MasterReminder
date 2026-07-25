@@ -8,7 +8,7 @@ const Reminder = require('./models/Reminder');
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers, // Vital para capturar el ingreso de usuarios
+    GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent
   ]
@@ -41,7 +41,6 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Cargador automático de eventos (lee la carpeta events para detectar guildMemberAdd.js)
 const eventsPath = path.join(__dirname, 'events');
 if (fs.existsSync(eventsPath)) {
   const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
