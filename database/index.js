@@ -54,7 +54,15 @@ module.exports = {
   // SISTEMA DE BIENVENIDAS
   // ==========================================
   getWelcomeConfig: async (guildId) => {
-    return await GuildConfig.findOne({ guildId });
+    const config = await GuildConfig.findOne({ guildId });
+    if (!config) return null;
+    return {
+      enabled: config.enabled === true || config.enabled === 'true' || config.enabled === 1,
+      channelId: config.channelId,
+      roleId: config.roleId,
+      message: config.message,
+      imageUrl: config.imageUrl
+    };
   },
 
   setWelcomeToggle: async (guildId, enabled) => {
