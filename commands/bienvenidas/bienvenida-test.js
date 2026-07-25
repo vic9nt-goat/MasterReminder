@@ -18,9 +18,16 @@ module.exports = {
 
       const config = await db.getWelcomeConfig(guildId);
 
-      if (!config || (config.enabled !== true && config.enabled !== 'true' && config.enabled !== 1)) {
+      if (!config) {
         return await interaction.editReply({ 
-          content: '⚠️ El sistema de bienvenidas está **desactivado** o no tiene una configuración guardada. Actívalo primero con `/bienvenida-config estado:True`.' 
+          content: '⚠️ No hay ninguna configuración guardada en la base de datos.' 
+        });
+      }
+
+      const isEnabled = config.enabled === true || config.enabled === 'true' || config.enabled === 1;
+      if (!isEnabled) {
+        return await interaction.editReply({ 
+          content: '⚠️ El sistema de bienvenidas está **desactivado**. Actívalo con `/bienvenida-config estado:True`.' 
         });
       }
 
