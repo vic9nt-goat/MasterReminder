@@ -29,6 +29,10 @@ module.exports = {
     .addStringOption(opt =>
       opt.setName('imagen')
         .setDescription('URL directa de la imagen de fondo estilo Koya')
+        .setRequired(false))
+    .addAttachmentOption(opt =>
+      opt.setName('imagen_archivo')
+        .setDescription('Sube o pega una imagen directamente desde tu dispositivo')
         .setRequired(false)),
 
   async execute(interaction) {
@@ -40,7 +44,11 @@ module.exports = {
       const canal = interaction.options.getChannel('canal');
       const rol = interaction.options.getRole('rol');
       const mensaje = interaction.options.getString('mensaje');
-      const imagen = interaction.options.getString('imagen');
+      const imagenUrlInput = interaction.options.getString('imagen');
+      const imagenArchivo = interaction.options.getAttachment('imagen_archivo');
+
+      // Si se subió un archivo, este tiene prioridad absoluta como enlace directo
+      const imagen = imagenArchivo ? imagenArchivo.url : imagenUrlInput;
 
       if (estado === null && !canal && !rol && !mensaje && !imagen) {
         const config = await db.getWelcomeConfig(guildId) || {};
