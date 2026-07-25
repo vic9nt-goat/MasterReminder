@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits } = require('discord.js');
 const mongoose = require('mongoose');
 const express = require('express');
 const path = require('path');
@@ -8,7 +8,7 @@ const Reminder = require('./models/Reminder');
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers, // <--- OBLIGATORIO para bienvenidas y detectar nuevos usuarios/bots
+    GatewayIntentBits.GuildMembers, // Vital para capturar el ingreso de usuarios
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent
   ]
@@ -56,18 +56,15 @@ if (fs.existsSync(eventsPath)) {
   }
 }
 
-// Detecta automáticamente las variables de entorno con nombres comunes
 const mongoUri = process.env.MONGO_URI || process.env.MONGO_URL;
 const discordToken = process.env.DISCORD_TOKEN || process.env.TOKEN;
 
 mongoose.connect(mongoUri)
   .then(() => {
     console.log('🍃 Conectado exitosamente a MongoDB Atlas');
-    
     app.listen(PORT, () => {
       console.log(`🌐 Dashboard ejecutándose en http://localhost:${PORT}`);
     });
-
     client.login(discordToken);
   })
   .catch(err => {
