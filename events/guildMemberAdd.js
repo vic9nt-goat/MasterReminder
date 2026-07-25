@@ -1,11 +1,12 @@
 // ==========================================
 // ARCHIVO: events/guildMemberAdd.js
 // ==========================================
-const { EmbedBuilder } = require('discord.js');
+const { Events, EmbedBuilder } = require('discord.js');
 const db = require('../database');
 
 module.exports = {
-  name: 'guildMemberAdd',
+  name: Events.GuildMemberAdd,
+
   async execute(member) {
     try {
       const guildId = member.guild.id;
@@ -39,13 +40,20 @@ module.exports = {
         embed.setImage(config.imageUrl);
       }
 
+      if (config.roleId) {
+        const role = member.guild.roles.cache.get(config.roleId);
+        if (role) {
+          await member.roles.add(role).catch(err => console.error('No se pudo asignar el rol automático:', err));
+        }
+      }
+
       await targetChannel.send({
         content: `${member}`,
         embeds: [embed]
       });
 
     } catch (error) {
-      console.error('Error en el evento guildMemberAdd:', error);
+      console.error('Error crítico en el evento de bienvenida:', error);
     }
   }
 };
