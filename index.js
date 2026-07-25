@@ -1,75 +1,93 @@
-const { Client, GatewayIntentBits } = require('discord.js');
+// ==========================================
+// ARCHIVO: database/index.js
+// ==========================================
 const mongoose = require('mongoose');
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const Reminder = require('./models/Reminder');
-
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-  ]
-});
-
-const app = express();
-const PORT = process.env.PORT || 10000;
-
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('/', async (req, res) => {
-  try {
-    const totalRecordatorios = await Reminder.countDocuments({});
-    const dbStatus = mongoose.connection.readyState === 1;
-
-    res.render('dashboard', {
-      totalRecordatorios,
-      dbStatus,
-      serversCount: client.guilds.cache.size 
-    });
-  } catch (error) {
-    console.error('Error al obtener datos para el dashboard:', error);
-    res.render('dashboard', {
-      totalRecordatorios: 0,
-      dbStatus: false,
-      serversCount: client.guilds.cache.size
-    });
-  }
-});
-
-const eventsPath = path.join(__dirname, 'events');
-if (fs.existsSync(eventsPath)) {
-  const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
-  for (const file of eventFiles) {
-    const filePath = path.join(eventsPath, file);
-    const event = require(filePath);
-    if (event.once) {
-      client.once(event.name, (...args) => event.execute(...args));
-    } else {
-      client.on(event.name, (...args) => event.execute(...args));
-    }
-  }
-}
+const Reminder = require('../models/Reminder');
+const GuildConfig = require('../models/GuildConfig');
 
 const mongoUri = process.env.MONGO_URI || process.env.MONGO_URL;
-const discordToken = process.env.DISCORD_TOKEN || process.env.TOKEN;
 
-mongoose.connect(mongoUri)
-  .then(() => {
-    console.log('🍃 Conectado exitosamente a MongoDB Atlas');
-    app.listen(PORT, () => {
-      console.log(`🌐 Dashboard ejecutándose en http://localhost:${PORT}`);
+if (mongoUri && (mongoUri.startsWith("mongodb://") || mongoUri.startsWith("mongodb+srv://"))) {
+  mongoose.connect(mongoUri)
+    .then(() => console.log('🍃 Conectado exitosamente a MongoDB Atlas'))
+    .catch(err => console.error('❌ Error conectando a MongoDB:', err));
+} else {
+  console.error('❌ Error conectando a MongoDB: URI inválida');
+}
+
+module.exports = {
+  setGuildRole: async (guildId, roleId) => {
+    return await GuildConfig.findOneAndUpdate(
+      { guildId },
+      { notifyRoleId: roleId },
+      { upsert: true, new: true }
+    );
+  },
+
+  getGuildRole: async (guildId) => {
+    const config = await GuildConfig.findOne({ guildId });
+    return config ? config.notifyRoleId : null;
+  },
+
+  addReminder: async (userId, channelId, guildId, message, remindAt, targetRoleId = null) => {
+    const newReminder = new Reminder({
+      userId,
+      channelId,
+      guildId,
+      message,
+      remindAt,
+      targetRoleId
     });
-    client.login(discordToken);
-  })
-  .catch(err => {
-    console.error('❌ Error al iniciar el bot o conectar a MongoDB:', err);
-  });
+    return await newReminder.save();
+  },
 
-client.once('ready', () => {
-  console.log(`🤖 Bot conectado como ${client.user.tag}`);
-});
+  getDueReminders: async () => {
+    return await Reminder.find({ remindAt: { $lte: Date.now() } });
+  },
+
+  getUserReminders: async (userId) => {
+    return await Reminder.find({ userId }).sort({ remindAt: 1 });
+  },
+
+  deleteReminder: async (id) => {
+    return await Reminder.findByIdAndDelete(id);
+  },
+
+  // ==========================================
+  // SISTEMA DE BIENVENIDAS
+  // ==========================================
+  getWelcomeConfig: async (guildId) => {
+    const config = await GuildConfig.findOne({ guildId });
+    if (!config) return null;
+    return {
+      enabled: config.enabled === true || config.enabled === 'true' || config.enabled === 1,
+      channelId: config.channelId || config.welcomeChannelId,
+      roleId: config.roleId,
+      message: config.message,
+      imageUrl: config.imageUrl
+    };
+  },
+
+  updateWelcomeConfig: async (guildId, updateData) => {
+    return await GuildConfig.findOneAndUpdate(
+      { guildId },
+      { $set: updateData },
+      { upsert: true, new: true }
+    );
+  },
+
+  resetWelcomeConfig: async (guildId) => {
+    return await GuildConfig.findOneAndUpdate(
+      { guildId },
+      { 
+        $unset: { 
+          enabled: "", 
+          channelId: "", 
+          roleId: "", 
+          message: "", 
+          imageUrl: "" 
+        } 
+      },
+      { new: true }
+    );
+  }
