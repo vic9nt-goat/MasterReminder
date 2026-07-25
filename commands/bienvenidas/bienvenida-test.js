@@ -7,60 +7,71 @@ const db = require('../../database');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('bienvenida-test')
-    .setDescription('Simula una entrada de miembro para comprobar el diseño visual y el funcionamiento actual')
+    .setDescription('Simula una tarjeta de bienvenida usando la configuración actual de la base de datos')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
     try {
       await interaction.deferReply({ flags: MessageFlags.Ephemeral });
       const guildId = interaction.guild.id;
+      const member = interaction.member;
 
-      const config = await db.getWelcomeConfig(guildId) || {};
-      const channelId = config.channelId || interaction.channel.id;
-      
-      const targetChannel = await interaction.guild.channels.fetch(channelId).catch(() => null) || interaction.channel;
+      // Obtenemos la configuración real de la base de datos
+      const config = await db.getWelcomeConfig(guildId);
 
+      if (!config || !config.enabled) {
+        return await interaction.editReply({ 
+          content: '⚠️ El sistema de bienvenidas está **desactivado** o no tiene una configuración guardada. Actívalo primero con `/bienvenida-config estado:True`.' 
+        });
+      }
+
+      // Definimos el canal de destino (si no hay configurado, lo manda al canal actual de la prueba)
+      const targetChannel = interaction.guild.channels.cache.get(config.channelId) || interaction.channel;
+
+      // Mensaje personalizado o predeterminado
       const customMsg = config.message || '¡Bienvenido {usuario} a {servidor}! Eres nuestro miembro número #{contador}.';
       const formattedMsg = customMsg
-        .replace(/{usuario}/g, `${interaction.user}`)
-        .replace(/{servidor}/g, interaction.guild.name)
-        .replace(/{contador}/g, interaction.guild.memberCount);
+        .replace(/{usuario}/g, `${member}`)
+        .replace(/{servidor}/g, member.guild.name)
+        .replace(/{contador}/g, member.guild.memberCount);
 
       const embed = new EmbedBuilder()
         .setColor('#5865F2')
-        .setTitle('🎉 ¡Nuevo Miembro en el Servidor!')
+        .setTitle('🧪 [PRUEBA] • ¡Nuevo Miembro en el Servidor!')
         .setDescription(formattedMsg)
         .addFields(
-          { name: '👤 Usuario de Prueba', value: `\`${interaction.user.tag}\``, inline: true },
-          { name: '📊 Censo Actual', value: `Miembro #\`${interaction.guild.memberCount}\``, inline: true }
+          { name: '👤 Usuario', value: `\`${member.user.tag}\``, inline: true },
+          { name: '📊 Censo Actual', value: `Miembro #\`${member.guild.memberCount}\``, inline: true }
         )
         .setTimestamp()
-        .setFooter({ text: `${interaction.guild.name} • Simulación de Bienvenida`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
+        .setFooter({ text: `${member.guild.name} • Sistema de Bienvenidas (Test)`, iconURL: member.guild.iconURL({ dynamic: true }) });
 
       if (config.imageUrl) {
         embed.setImage(config.imageUrl);
       }
 
+      // Intentamos simular el rol si está configurado (solo avisará si no puede por permisos)
+      let rolInfo = '`Ninguno configurado`';
+      if (config.roleId) {
+        const role = interaction.guild.roles.cache.get(config.roleId);
+        if (role) rolInfo = `${role}`;
+      }
+
+      // Enviamos el mensaje simulado al canal correspondiente
       await targetChannel.send({
-        content: `${interaction.user}`,
+        content: `${member}`,
         embeds: [embed]
       });
 
-      const successEmbed = new EmbedBuilder()
-        .setColor('#57F287')
-        .setTitle('🧪 Test Ejecutado con Éxito')
-        .setDescription(`Se ha despachado una tarjeta de bienvenida simulada al canal ${targetChannel}.`)
-        .setTimestamp();
-
-      if (config.imageUrl) {
-        successEmbed.setImage(config.imageUrl);
-      }
-
-      await interaction.editReply({ embeds: [successEmbed] });
+      await interaction.editReply({ 
+        content: `✅ ¡Simulación de bienvenida enviada con éxito a ${targetChannel} usando los datos de la base de datos!` 
+      });
 
     } catch (error) {
       console.error('Error en /bienvenida-test:', error);
-      await interaction.editReply({ content: '❌ Ocurrió un error al intentar enviar la simulación.' });
+      await interaction.editReply({ 
+        content: '❌ Ocurrió un error al ejecutar la simulación de bienvenida.' 
+      });
     }
   }
 };
