@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
-const { mongoUri } = require('../config.json');
-const GuildConfig = require('../models/GuildConfig');
 const Reminder = require('../models/Reminder');
+const GuildConfig = require('../models/GuildConfig');
 
-mongoose.connect(mongoUri)
-  .then(() => console.log('🍃 Conectado exitosamente a MongoDB Atlas'))
-  .catch(err => console.error('❌ Error conectando a MongoDB:', err));
+const mongoUri = process.env.MONGO_URI || process.env.MONGO_URL;
+
+if (mongoUri && (mongoUri.startsWith("mongodb://") || mongoUri.startsWith("mongodb+srv://"))) {
+  mongoose.connect(mongoUri)
+    .then(() => console.log('🍃 Conectado exitosamente a MongoDB Atlas'))
+    .catch(err => console.error('❌ Error conectando a MongoDB:', err));
+} else {
+  console.error('❌ Error conectando a MongoDB: MongoParseError: Invalid scheme, expected connection string to start with "mongodb://" or "mongodb+srv://"');
+}
 
 module.exports = {
   setGuildRole: async (guildId, roleId) => {
@@ -40,6 +45,11 @@ module.exports = {
   getUserReminders: async (userId) => {
     return await Reminder.find({ userId }).sort({ remindAt: 1 });
   },
+
+  deleteReminder: async (id) => {
+    return await Reminder.findByIdAndDelete(id);
+  }
+};
 
   deleteReminder: async (id) => {
     return await Reminder.findByIdAndDelete(id);
