@@ -51,7 +51,7 @@ module.exports = {
   },
 
   // ==========================================
-  // NUEVAS FUNCIONES PARA EL SISTEMA DE BIENVENIDAS
+  // SISTEMA DE BIENVENIDAS
   // ==========================================
   getWelcomeConfig: async (guildId) => {
     return await GuildConfig.findOne({ guildId });
@@ -111,5 +111,33 @@ module.exports = {
       },
       { new: true }
     );
+  },
+
+  // ==========================================
+  // CANALES DE ESTADÍSTICAS (STATS)
+  // ==========================================
+  setStatsConfig: async (guildId, data) => {
+    return await GuildConfig.findOneAndUpdate(
+      { guildId },
+      {
+        statsCategory: data.categoryId,
+        statsMemberChannel: data.memberChannelId,
+        statsHumanChannel: data.humanChannelId,
+        statsBotChannel: data.botChannelId
+      },
+      { upsert: true, new: true }
+    );
+  },
+
+  getStatsConfig: async (guildId) => {
+    const config = await GuildConfig.findOne({ guildId });
+    if (!config || !config.statsMemberChannel) return null;
+    return {
+      categoryId: config.statsCategory,
+      memberChannelId: config.statsMemberChannel,
+      humanChannelId: config.statsHumanChannel,
+      botChannelId: config.statsBotChannel
+    };
   }
+};
 };
