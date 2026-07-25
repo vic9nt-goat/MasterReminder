@@ -2,12 +2,12 @@
 // ARCHIVO: commands/bienvenida/bienvenida-test.js
 // ==========================================
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const db = require('../../database');
+exactDb = require('../../database');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('bienvenida-test')
-    .setDescription('Simula una tarjeta de bienvenida usando la configuración actual de la base de datos')
+    .setDescription('Simula EXACTAMENTE lo que configuraste en el comando de bienvenida')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
@@ -16,11 +16,12 @@ module.exports = {
       const guildId = interaction.guild.id;
       const member = interaction.member;
 
-      let config = await db.getWelcomeConfig(guildId);
+      const config = await exactDb.getWelcomeConfig(guildId);
 
-      if (!config) {
-        await db.updateWelcomeConfig(guildId, { enabled: true, channelId: interaction.channel.id });
-        config = await db.getWelcomeConfig(guildId);
+      if (!config || !config.channelId) {
+        return await interaction.editReply({ 
+          content: '⚠️ No hay ninguna configuración guardada. Configura primero con `/bienvenida-config`.' 
+        });
       }
 
       const targetChannel = interaction.guild.channels.cache.get(config.channelId) || interaction.channel;
@@ -33,14 +34,14 @@ module.exports = {
 
       const embed = new EmbedBuilder()
         .setColor('#5865F2')
-        .setTitle('🧪 [PRUEBA] • ¡Nuevo Miembro en el Servidor!')
+        .setTitle('🎉 • ¡Nuevo Miembro!')
         .setDescription(formattedMsg)
         .addFields(
           { name: '👤 Usuario', value: `\`${member.user.tag}\``, inline: true },
           { name: '📊 Censo Actual', value: `Miembro #\`${member.guild.memberCount}\``, inline: true }
         )
         .setTimestamp()
-        .setFooter({ text: `${member.guild.name} • Sistema de Bienvenidas (Test)`, iconURL: member.guild.iconURL({ dynamic: true }) });
+        .setFooter({ text: member.guild.name, iconURL: member.guild.iconURL({ dynamic: true }) });
 
       if (config.imageUrl) {
         embed.setImage(config.imageUrl);
@@ -52,13 +53,13 @@ module.exports = {
       });
 
       await interaction.editReply({ 
-        content: `✅ ¡Simulación de bienvenida enviada con éxito a ${targetChannel}!` 
+        content: `✅ ¡Mensaje de prueba enviado exactamente como lo configuraste en ${targetChannel}!` 
       });
 
     } catch (error) {
       console.error('Error en /bienvenida-test:', error);
       await interaction.editReply({ 
-        content: '❌ Ocurrió un error al ejecutar la simulación de bienvenida.' 
+        content: '❌ Ocurrió un error al ejecutar la prueba.' 
       });
     }
   }
