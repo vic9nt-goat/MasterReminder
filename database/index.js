@@ -48,5 +48,68 @@ module.exports = {
 
   deleteReminder: async (id) => {
     return await Reminder.findByIdAndDelete(id);
+  },
+
+  // ==========================================
+  // NUEVAS FUNCIONES PARA EL SISTEMA DE BIENVENIDAS
+  // ==========================================
+  getWelcomeConfig: async (guildId) => {
+    return await GuildConfig.findOne({ guildId });
+  },
+
+  setWelcomeToggle: async (guildId, enabled) => {
+    return await GuildConfig.findOneAndUpdate(
+      { guildId },
+      { enabled },
+      { upsert: true, new: true }
+    );
+  },
+
+  setWelcomeChannel: async (guildId, channelId) => {
+    return await GuildConfig.findOneAndUpdate(
+      { guildId },
+      { channelId },
+      { upsert: true, new: true }
+    );
+  },
+
+  setWelcomeRole: async (guildId, roleId) => {
+    return await GuildConfig.findOneAndUpdate(
+      { guildId },
+      { roleId },
+      { upsert: true, new: true }
+    );
+  },
+
+  setWelcomeMessage: async (guildId, message) => {
+    return await GuildConfig.findOneAndUpdate(
+      { guildId },
+      { message },
+      { upsert: true, new: true }
+    );
+  },
+
+  setWelcomeImage: async (guildId, imageUrl) => {
+    return await GuildConfig.findOneAndUpdate(
+      { guildId },
+      { imageUrl },
+      { upsert: true, new: true }
+    );
+  },
+
+  resetWelcomeConfig: async (guildId) => {
+    return await GuildConfig.findOneAndUpdate(
+      { guildId },
+      { 
+        $unset: { 
+          enabled: "", 
+          channelId: "", 
+          roleId: "", 
+          message: "", 
+          imageUrl: "" 
+        } 
+      },
+      { new: true }
+    );
   }
 };
