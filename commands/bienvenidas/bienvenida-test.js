@@ -1,3 +1,6 @@
+// ==========================================
+// ARCHIVO: commands/bienvenida/bienvenida-test.js
+// ==========================================
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const db = require('../../database');
 
@@ -48,6 +51,10 @@ module.exports = {
         .setTitle('🧪 Test Ejecutado con Éxito')
         .setDescription(`Se ha despachado una tarjeta de bienvenida simulada al canal ${targetChannel}.`)
         .setTimestamp();
+
+      if (config.imageUrl) {
+        successEmbed.setImage(config.imageUrl);
+      }
 
       await interaction.editReply({ embeds: [successEmbed] });
 
