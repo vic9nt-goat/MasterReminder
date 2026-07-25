@@ -50,8 +50,3 @@ module.exports = {
     return await Reminder.findByIdAndDelete(id);
   }
 };
-
-  deleteReminder: async (id) => {
-    return await Reminder.findByIdAndDelete(id);
-  }
-};
