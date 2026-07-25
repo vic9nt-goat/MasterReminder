@@ -68,8 +68,8 @@ module.exports = {
 
       await interaction.editReply({ embeds: [embed] });
     } catch (error) {
-      console.error('Error en /bienvenida-config:', error);
-      await interaction.editReply({ content: '❌ Error al guardar la configuración.' });
+      console.error('Error detallado en /bienvenida-config:', error);
+      await interaction.editReply({ content: `❌ Error al guardar la configuración: \`${error.message}\`` });
     }
   }
 };
