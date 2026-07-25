@@ -47,7 +47,7 @@ module.exports = {
       const imagenUrlInput = interaction.options.getString('imagen');
       const imagenArchivo = interaction.options.getAttachment('imagen_archivo');
 
-      // Si se subió un archivo, este tiene prioridad absoluta como enlace directo
+      // AQUÍ ESTÁ LA MAGIA: Captura tanto si pones una URL como si subes un archivo
       const imagen = imagenArchivo ? imagenArchivo.url : imagenUrlInput;
 
       if (estado === null && !canal && !rol && !mensaje && !imagen) {
