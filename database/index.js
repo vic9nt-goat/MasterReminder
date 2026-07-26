@@ -54,13 +54,13 @@ module.exports = {
   },
 
   // ==========================================
-  // SISTEMA DE BIENVENIDAS
+  // SISTEMA DE BIENVENIDAS UNIFICADO (CENTRALIZADO)
   // ==========================================
   getWelcomeConfig: async (guildId) => {
     const config = await GuildConfig.findOne({ guildId });
     if (!config) return null;
     return {
-      enabled: config.enabled === true || config.enabled === 'true' || config.enabled === 1 || config.estado === true || config.estado === 'true',
+      enabled: config.enabled === true || config.enabled === 'true' || config.enabled === 1,
       channelId: config.channelId || config.welcomeChannelId,
       roleId: config.roleId,
       message: config.message,
@@ -68,42 +68,10 @@ module.exports = {
     };
   },
 
-  setWelcomeToggle: async (guildId, enabled) => {
+  updateWelcomeConfig: async (guildId, updateData) => {
     return await GuildConfig.findOneAndUpdate(
       { guildId },
-      { enabled: Boolean(enabled) },
-      { upsert: true, new: true }
-    );
-  },
-
-  setWelcomeChannel: async (guildId, channelId) => {
-    return await GuildConfig.findOneAndUpdate(
-      { guildId },
-      { channelId },
-      { upsert: true, new: true }
-    );
-  },
-
-  setWelcomeRole: async (guildId, roleId) => {
-    return await GuildConfig.findOneAndUpdate(
-      { guildId },
-      { roleId },
-      { upsert: true, new: true }
-    );
-  },
-
-  setWelcomeMessage: async (guildId, message) => {
-    return await GuildConfig.findOneAndUpdate(
-      { guildId },
-      { message },
-      { upsert: true, new: true }
-    );
-  },
-
-  setWelcomeImage: async (guildId, imageUrl) => {
-    return await GuildConfig.findOneAndUpdate(
-      { guildId },
-      { imageUrl },
+      { $set: updateData },
       { upsert: true, new: true }
     );
   },
