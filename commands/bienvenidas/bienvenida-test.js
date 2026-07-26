@@ -2,7 +2,7 @@
 // ARCHIVO: commands/bienvenida/bienvenida-test.js
 // ==========================================
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const GuildConfig = require('../../models/GuildConfig');
+const db = require('../../database');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,7 +16,7 @@ module.exports = {
       const guildId = interaction.guild.id;
       const member = interaction.member;
 
-      const config = await GuildConfig.findOne({ guildId });
+      const config = await db.getWelcomeConfig(guildId);
 
       if (!config || !config.channelId) {
         return await interaction.editReply({ 
