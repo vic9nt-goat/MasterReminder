@@ -2,7 +2,7 @@
 // ARCHIVO: commands/bienvenida/bienvenida-config.js
 // ==========================================
 const { SlashCommandBuilder, ChannelType, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const GuildConfig = require('../../models/GuildConfig');
+const db = require('../../database');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -51,11 +51,9 @@ module.exports = {
       if (imagen) updateData.imageUrl = imagen;
       if (rol) updateData.roleId = rol.id;
 
-      await GuildConfig.findOneAndUpdate(
-        { guildId },
-        { $set: updateData },
-        { upsert: true, new: true }
-      );
+      await db.updateWelcomeConfig ? 
+        await db.updateWelcomeConfig(guildId, updateData) : 
+        await require('../../models/GuildConfig').findOneAndUpdate({ guildId }, { $set: updateData }, { upsert: true, new: true });
 
       const embed = new EmbedBuilder()
         .setColor('#57F287')
