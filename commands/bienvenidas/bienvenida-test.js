@@ -2,12 +2,12 @@
 // ARCHIVO: commands/bienvenida/bienvenida-test.js
 // ==========================================
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const db = require('../../database');
+const GuildConfig = require('../../models/GuildConfig');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('bienvenida-test')
-    .setDescription('Simula EXACTAMENTE lo que configuraste en el comando de bienvenida')
+    .setDescription('Prueba la bienvenida usando estrictamente el mensaje personalizado guardado')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
@@ -16,18 +16,29 @@ module.exports = {
       const guildId = interaction.guild.id;
       const member = interaction.member;
 
-      const config = await db.getWelcomeConfig(guildId);
+      const config = await GuildConfig.findOne({ guildId });
 
       if (!config || !config.channelId) {
         return await interaction.editReply({ 
-          content: '⚠️ No hay ninguna configuración guardada. Configura primero con `/bienvenida-config`.' 
+          content: '⚠️ No hay ninguna configuración guardada o falta definir el canal en `/bienvenida-config`.' 
         });
       }
 
-      const targetChannel = interaction.guild.channels.cache.get(config.channelId) || interaction.channel;
+      const targetChannel = interaction.guild.channels.cache.get(config.channelId);
 
-      const customMsg = config.message || '¡Bienvenido {usuario} a {servidor}! Eres nuestro miembro número #{contador}.';
-      const formattedMsg = customMsg
+      if (!targetChannel) {
+        return await interaction.editReply({ 
+          content: `⚠️ El canal configurado (<#${config.channelId}>) ya no existe o el bot no tiene acceso a él.` 
+        });
+      }
+
+      if (!config.message) {
+        return await interaction.editReply({ 
+          content: '⚠️ No has configurado ningún mensaje personalizado en `/bienvenida-config`.' 
+        });
+      }
+
+      const formattedMsg = config.message
         .replace(/{usuario}/g, `${member}`)
         .replace(/{user}/g, `${member}`)
         .replace(/{servidor}/g, member.guild.name)
@@ -38,10 +49,6 @@ module.exports = {
         .setColor('#5865F2')
         .setTitle('🎉 • ¡Nuevo Miembro!')
         .setDescription(formattedMsg)
-        .addFields(
-          { name: '👤 Usuario', value: `\`${member.user.tag}\``, inline: true },
-          { name: '📊 Censo Actual', value: `Miembro #\`${member.guild.memberCount}\``, inline: true }
-        )
         .setTimestamp()
         .setFooter({ text: member.guild.name, iconURL: member.guild.iconURL({ dynamic: true }) });
 
@@ -54,8 +61,19 @@ module.exports = {
         embeds: [embed]
       });
 
+      if (config.roleId) {
+        const role = interaction.guild.roles.cache.get(config.roleId);
+        if (role) {
+          try {
+            await member.roles.add(role);
+          } catch (e) {
+            console.error('No se pudo asignar el rol en la prueba:', e);
+          }
+        }
+      }
+
       await interaction.editReply({ 
-        content: `✅ ¡Mensaje de prueba enviado exactamente como lo configuraste en ${targetChannel}!` 
+        content: `✅ ¡Listo! Se envió exactamente tu mensaje personalizado al canal ${targetChannel}.` 
       });
 
     } catch (error) {
