@@ -54,7 +54,7 @@ module.exports = {
   },
 
   // ==========================================
-  // SISTEMA DE BIENVENIDAS UNIFICADO (CENTRALIZADO)
+  // SISTEMA DE BIENVENIDAS UNIFICADO
   // ==========================================
   getWelcomeConfig: async (guildId) => {
     const config = await GuildConfig.findOne({ guildId });
