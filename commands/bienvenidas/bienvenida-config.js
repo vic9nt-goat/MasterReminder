@@ -51,9 +51,7 @@ module.exports = {
       if (imagen) updateData.imageUrl = imagen;
       if (rol) updateData.roleId = rol.id;
 
-      await db.updateWelcomeConfig ? 
-        await db.updateWelcomeConfig(guildId, updateData) : 
-        await require('../../models/GuildConfig').findOneAndUpdate({ guildId }, { $set: updateData }, { upsert: true, new: true });
+      await db.updateWelcomeConfig(guildId, updateData);
 
       const embed = new EmbedBuilder()
         .setColor('#57F287')
