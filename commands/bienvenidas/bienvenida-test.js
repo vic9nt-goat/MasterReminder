@@ -2,7 +2,7 @@
 // ARCHIVO: commands/bienvenida/bienvenida-test.js
 // ==========================================
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
-const db = require('../../database');
+const GuildConfig = require('../../models/GuildConfig');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,7 +16,7 @@ module.exports = {
       const guildId = interaction.guild.id;
       const member = interaction.member;
 
-      const config = await db.getWelcomeConfig(guildId);
+      const config = await GuildConfig.findOne({ guildId });
 
       if (!config || !config.channelId) {
         return await interaction.editReply({ 
@@ -29,7 +29,9 @@ module.exports = {
       const customMsg = config.message || '¡Bienvenido {usuario} a {servidor}! Eres nuestro miembro número #{contador}.';
       const formattedMsg = customMsg
         .replace(/{usuario}/g, `${member}`)
+        .replace(/{user}/g, `${member}`)
         .replace(/{servidor}/g, member.guild.name)
+        .replace(/{server}/g, member.guild.name)
         .replace(/{contador}/g, member.guild.memberCount);
 
       const embed = new EmbedBuilder()
